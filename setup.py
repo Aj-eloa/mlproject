@@ -21,5 +21,5 @@ setup(
     author='Aj',
     author_email='crimsondew@gmail.com',
     packages=find_packages(),
-    install_requires=get_requirements('requirement.txt'),
+    install_requires=get_requirements('requirements.txt'),
 )

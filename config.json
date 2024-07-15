@@ -1,0 +1,5 @@
+{
+    "database_name": "Students",
+    "collection_name": "mastery_connect_tests",
+    "retry_attempts": 3
+  }
