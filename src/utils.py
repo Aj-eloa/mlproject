@@ -873,3 +873,94 @@ def create_dash_app(df, performance_trend_df, top_n_standards=5, specific_standa
 def display_performance_figure(df, performance_trend_df, top_n_standards=5, specific_standards=None, port=8055):
     app = create_dash_app(df, performance_trend_df, top_n_standards, specific_standards)
     app.run_server(debug=True, port=port)
+
+
+
+def create_performance_trend_plot(performance_trend_df):
+    # Convert date to datetime if it's not already
+    performance_trend_df['date'] = pd.to_datetime(performance_trend_df['date'])
+
+    # Sort the dataframe by date
+    performance_trend_df = performance_trend_df.sort_values('date')
+
+    # Create the figure
+    fig = go.Figure()
+
+    # Add scatter plot
+    fig.add_trace(go.Scatter(
+        x=performance_trend_df['date'],
+        y=performance_trend_df['avg_performance'],
+        mode='markers',
+        marker=dict(
+            size=performance_trend_df['count'],
+            sizemode='area',
+            sizeref=2.*max(performance_trend_df['count'])/(40.**2),
+            sizemin=4,
+            color=performance_trend_df['avg_performance'],
+            colorscale='Sunsetdark',
+            colorbar=dict(title='Avg Performance'),
+            showscale=True
+        ),
+        text=performance_trend_df['count'],
+        hovertemplate='Date: %{x}<br>Avg Performance: %{y:.2f}<br>Class size: %{text}<extra></extra>'
+    ))
+
+    # Update the layout
+    fig.update_layout(
+        title='Student Performance Over Time',
+        xaxis_title='Date',
+        yaxis_title='Average Performance',
+        height=600,
+        width=1000
+    )
+
+    return fig
+
+def create_frequency_distributions_plot(standard_dist, item_type_dist, dok_dist):
+    # Looking at just one standard
+    chm_stnds = standard_dist[standard_dist['standards'].str.contains('Chm')]
+
+    #  Create subplots with increased vertical spacing
+    fig = make_subplots(rows=3, cols=1, 
+                        subplot_titles=("Distribution of Standards", 
+                                        "Distribution of Question Types", 
+                                        "Distribution of Depth of Knowledge"),
+                        vertical_spacing=0.15)  # Increased from 0.1 to 0.2
+
+    # Function to create a bar trace with minimum height
+    def create_bar_trace(x, y, name, min_height=0.5):
+        return go.Bar(
+            x=x,
+            y=y,
+            name=name,
+            text=y,
+            textposition='outside',
+            hoverinfo='x+y',
+            marker_line_width=0,
+            marker=dict(color=y, colorscale='Sunsetdark'),
+            customdata=y,
+            hovertemplate='%{x}<br>Count: %{customdata}<extra></extra>'
+        )
+
+    # Plot for Standards Distribution
+    fig.add_trace(create_bar_trace(chm_stnds['standards'], chm_stnds['count'], "Chem Standards"), row=1, col=1)
+
+    # Plot for Item Type Distribution
+    fig.add_trace(create_bar_trace(item_type_dist['item_type'], item_type_dist['count'], "Item Types"), row=2, col=1)
+
+    # Plot for Depth of Knowledge Distribution
+    fig.add_trace(create_bar_trace(dok_dist['dok'], dok_dist['count'], "Depth of Knowledge"), row=3, col=1)
+
+    # Update layout
+    fig.update_layout(height=1800, width=1000, title_text="Frequency Distributions", showlegend=False)
+
+    # Update y-axes
+    for i in range(1, 4):
+        fig.update_yaxes(title_text="Count", row=i, col=1, rangemode='tozero')
+
+    # Update x-axes
+    fig.update_xaxes(title_text="Standards", row=1, col=1, tickangle=45)
+    fig.update_xaxes(title_text="Item Types", row=2, col=1, tickangle=45)
+    fig.update_xaxes(title_text="Depth of Knowledge", row=3, col=1)
+
+    return fig
