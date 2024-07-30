@@ -1,8 +1,4 @@
 format: jb-book
 root: intro
 chapters:
-- file: markdown
-- file: notebooks
-  sections:
-    - file: ../notebook/EDA studentsTestData.ipynb
-- file: markdown-notebooks
+- file: notebook/EDA_studentsTestData.ipynb
