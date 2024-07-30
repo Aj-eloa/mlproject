@@ -3,5 +3,4 @@ numpy
 seaborn
 matplotlib
 pymongo
-bson
 -e .

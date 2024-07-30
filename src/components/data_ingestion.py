@@ -117,17 +117,23 @@ def update_mongodb(df, test_info, db):
     students_collection = db["students"]
     tests_collection = db["tests"]
 
+    # Strip whitespace from test_info fields
+    for key in ['test_id', 'class', 'assessment_name']:
+        if key in test_info:
+            test_info[key] = test_info[key].strip()
+
     test_document = {
-        "_id": ObjectId(),
         "test_id": test_info['test_id'],
         "date": test_info['date'],
         "class": test_info['class'],
         "assessment_name": test_info['assessment_name'],
         "assessment_points_possible": test_info['assessment_points_possible'],
         "questions": [],
-        "student_results": []
+        "student_results": [],
+        "teacher": None  # We'll set this to the teacher of the first student we process
     }
 
+    # Add question metadata
     question_metadata_fields = [
         'item', 'standard', 'item_type_name', 'dok', 'passage_genre',
         'points', 'correct_answer', 'percent_correct'
@@ -135,23 +141,28 @@ def update_mongodb(df, test_info, db):
 
     for question in df.columns.levels[0]:
         if question != 'student_info':
-            question_data = {"question_id": question}
+            question_data = {"question_id": question.strip()}
             for field in question_metadata_fields:
                 if (question, field) in df.columns:
-                    question_data[field] = df.loc[:, (question, field)].iloc[0]
+                    value = df.loc[:, (question, field)].iloc[0]
+                    question_data[field] = value.strip() if isinstance(value, str) else value
             test_document['questions'].append(question_data)
 
+    # Loop to populate collections
     for _, row in df.iterrows():
-        student_id = row[('student_info', 'student_id')]
+        student_id = row[('student_info', 'student_id')].strip()
 
         student_data = {
-            "_id": ObjectId(),
             "student_id": student_id,
-            "first_name": row[('student_info', 'first_name')],
-            "last_name": row[('student_info', 'last_name')],
-            "school": row[('student_info', 'school')],
-            "teacher": row[('student_info', 'teacher')]
+            "first_name": row[('student_info', 'first_name')].strip(),
+            "last_name": row[('student_info', 'last_name')].strip(),
+            "school": row[('student_info', 'school')].strip(),
+            "teacher": row[('student_info', 'teacher')].strip()
         }
+
+        # Set the teacher for the test document if it hasn't been set yet
+        if test_document['teacher'] is None:
+            test_document['teacher'] = student_data['teacher']
 
         test_result = {
             "test_id": test_info['test_id'],
@@ -164,8 +175,8 @@ def update_mongodb(df, test_info, db):
         for question in df.columns.levels[0]:
             if question != 'student_info':
                 response = {
-                    "question": question,
-                    "response": row[(question, 'response')]
+                    "question": question.strip(),
+                    "response": row[(question, 'response')].strip() if isinstance(row[(question, 'response')], str) else row[(question, 'response')]
                 }
                 test_result['responses'].append(response)
 
@@ -178,23 +189,22 @@ def update_mongodb(df, test_info, db):
             upsert=True
         )
 
-
         test_document['student_results'].append({
             "student_id": student_id,
             "overall_score": test_result['overall_score'],
             "overall_percentage": test_result['overall_percentage']
         })
+
     logger.info(f"Updated/inserted student records for: {test_info['class']}")
 
     tests_collection.update_one(
-    {"test_id": test_info['test_id']},
-    {"$set": test_document},
-    upsert=True 
+        {"test_id": test_info['test_id']},
+        {"$set": test_document},
+        upsert=True 
     )
 
     logger.info(f"Inserted test document: {test_info['test_id']}")
-
-
+    
 def get_csv_files(directory):
     """
     Retrieve a list of CSV files from the given directory.
