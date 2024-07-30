@@ -1,0 +1,27 @@
+title: Student Test Data Analysis and Visualizations
+author: Adrian Allen
+logo: logo.png
+
+execute:
+  execute_notebooks: force
+
+repository:
+  url: https://github.com/Aj-eloa/mlproject 
+  path_to_book: test_analysis_book  # The sub directory where the book folder is contained. 
+  branch: main  # Use 'main' or 'master' depending on your repository
+
+html:
+  use_issues_button: true
+  use_repository_button: true
+
+parse:
+  myst_enable_extensions:
+    - html_image
+    - colon_fence
+    - linkify
+
+sphinx:
+  extra_extensions:
+    - 'sphinx.ext.autodoc'
+    - 'sphinx.ext.napoleon'
+    - 'sphinx.ext.viewcode'
