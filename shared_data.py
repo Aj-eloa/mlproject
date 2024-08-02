@@ -37,9 +37,8 @@ def create_mapping(original_values, fake_function):
     return {value: fake_function() for value in set(original_values)}
 
 def anonymize_df(df):
-    """Anonymize the dataframe by replacing identifiable information."""
+    """Anonymize the dataframe by replacing identifiable information in-place."""
     logger.info("Starting dataframe anonymization")
-    anon_df = df.copy()
     
     # Create mappings for names and IDs
     student_id_map = {id: hashlib.md5(str(id).encode()).hexdigest()[:8] for id in df['student_id'].unique()}
@@ -57,19 +56,19 @@ def anonymize_df(df):
             new_test_id = f"Test_{fake.word().capitalize()}_{fake.date_this_year().strftime('%Y%m%d')}"
         test_id_map[test_id] = new_test_id
     
-    # Apply mappings
-    anon_df['student_id'] = anon_df['student_id'].map(student_id_map)
-    anon_df['first_name'] = anon_df['first_name'].map(first_name_map)
-    anon_df['last_name'] = anon_df['last_name'].map(last_name_map)
-    anon_df['class_name'] = anon_df['class_name'].map(class_name_map)
-    anon_df['test_id'] = anon_df['test_id'].map(test_id_map)
+    # Apply mappings in-place
+    df['student_id'] = df['student_id'].map(student_id_map)
+    df['first_name'] = df['first_name'].map(first_name_map)
+    df['last_name'] = df['last_name'].map(last_name_map)
+    df['class_name'] = df['class_name'].map(class_name_map)
+    df['test_id'] = df['test_id'].map(test_id_map)
     
     # Update test_name based on the new test_id
-    anon_df['test_name'] = anon_df['test_id'].apply(lambda x: ' '.join(x.split('_')[1:-1]))
+    df['test_name'] = df['test_id'].apply(lambda x: ' '.join(x.split('_')[1:-1]))
     
     logger.info("Dataframe anonymization completed")
    
-    return anon_df
+    return df
 
 def load_data(force_reload=False, anonymize=False):
     global _data, _last_load_time
