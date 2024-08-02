@@ -11,7 +11,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 from src.components.db_connection import build_query, get_database, logger
 from src.pipelines import mongo_db_pipelines as m_db
-from dotenv import load_dotenv
+
 
 
 from shared_data import get_data, logger, get_default_query

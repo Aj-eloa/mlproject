@@ -7,4 +7,5 @@ dash
 faker
 gunicorn
 plotly
+python-dotenv
 -e .
