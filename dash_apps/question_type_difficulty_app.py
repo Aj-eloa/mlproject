@@ -89,14 +89,17 @@ def create_question_type_difficulty_app(df):
     question_type_difficulty = process_question_type_difficulty(df)  # Process the data for this specific app
     
     app = dash.Dash(__name__)
+    server = app.server
     app.layout = create_dash_layout()
     register_callbacks(app, question_type_difficulty)
     
     logger.info("Question type difficulty app created successfully")
-    return app
+    return app, server
+
+app, server = create_question_type_difficulty_app(get_data(anonymize=True))
 
 if __name__ == "__main__":
     logger.info("Starting standalone app")
-    app = create_question_type_difficulty_app(anonymize=True)
+    app, server = create_question_type_difficulty_app(anonymize=True)
     logger.info("Running server")
     app.run_server(debug=True, port=8054)

@@ -271,11 +271,14 @@ def create_comprehensive_dash_app(df, custom_query=None):
     performance_trend_df = process_performance_trend(students, query)  
     
     app = dash.Dash(__name__)
+    server = app.server
     app.layout = create_dash_layout()
     register_callbacks(app, df, performance_trend_df)
     
     logger.info("Performance dash app created successfully")
-    return app
+    return app, server
+
+app, server = create_comprehensive_dash_app(get_data(anonymize=True))
 
 # This is used when running the app standalone
 if __name__ == '__main__':
@@ -283,6 +286,6 @@ if __name__ == '__main__':
     # Example of how you could pass a custom query
     # custom_query = {"some_field": "some_value"}
     df = get_data(anonymize=True)
-    app = create_comprehensive_dash_app(df)  # Or pass custom_query here if needed
+    app, server = create_comprehensive_dash_app(df)  # Or pass custom_query here if needed
     logger.info("Running server")
     app.run_server(debug=True, port=8055)

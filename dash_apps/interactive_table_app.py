@@ -188,14 +188,17 @@ def create_interactive_table_dash_app(anonymize=False, width='80%', height='400p
     missed_test_df, student_summary = load_data(anonymize)
     
     app = dash.Dash(__name__)
+    server = app.server
     app.layout = create_dash_layout(student_summary, width, height, highlight_color)
     register_callbacks(app, student_summary, missed_test_df)
     
     logger.info("Interactive student table created successfully")
-    return app
+    return app, server
+
+app, server = create_interactive_table_dash_app(anonymize=True)
 
 if __name__ == "__main__":
     logger.info("Starting standalone app")
-    app = create_interactive_table_dash_app(anonymize=True)
+    app, server = create_interactive_table_dash_app(anonymize=True)
     logger.info("Running server")
     app.run_server(debug=True, port=8051)

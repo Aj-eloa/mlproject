@@ -106,14 +106,20 @@ def create_performance_dash_app(df):
     performance_by_standard = process_performance_data(df)
     
     app = dash.Dash(__name__, suppress_callback_exceptions=True)
+    server = app.server  # The server needs to be exposed to gunicorn
     app.layout = create_dash_layout(performance_by_standard)
     register_callbacks(app, performance_by_standard)
     
     logger.info("Performance dash app created successfully")
-    return app
+    return app, server  # Return both app and server
+
+# This ensures that the app and server are created regardless of how the file is run
+app, server = create_performance_dash_app(get_data(anonymize=True))
 
 if __name__ == "__main__":
     logger.info("Starting standalone app")
-    app = create_performance_dash_app(anonymize=True)
+    app, server = create_performance_dash_app(get_data(anonymize=True))
     logger.info("Running server")
     app.run_server(debug=True, port=8052)
+
+

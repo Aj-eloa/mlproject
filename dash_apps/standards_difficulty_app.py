@@ -90,14 +90,17 @@ def create_standards_difficulty_app(df):
     standard_difficulty = process_standards_difficulty(df)  # Process the data for this specific app
     
     app = dash.Dash(__name__)
+    server = app.server
     app.layout = create_dash_layout()
     register_callbacks(app, standard_difficulty)
     
     logger.info("Standards difficulty app created successfully")
-    return app
+    return app, server
+
+app, server = create_standards_difficulty_app(get_data(anonymize=True))
 
 if __name__ == "__main__":
     logger.info("Starting standalone app")
-    app = create_standards_difficulty_app(anonymize=True)
+    app, server = create_standards_difficulty_app(anonymize=True)
     logger.info("Running server")
     app.run_server(debug=True, port=8053)
