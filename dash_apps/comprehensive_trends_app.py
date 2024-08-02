@@ -288,4 +288,4 @@ if __name__ == '__main__':
     df = get_data(anonymize=True)
     app, server = create_comprehensive_dash_app(df)  # Or pass custom_query here if needed
     logger.info("Running server")
-    app.run_server(debug=True, port=8055)
+    app.run_server(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8055)))

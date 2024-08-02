@@ -103,4 +103,4 @@ if __name__ == "__main__":
     logger.info("Starting standalone app")
     app, server = create_standards_difficulty_app(anonymize=True)
     logger.info("Running server")
-    app.run_server(debug=True, port=8053)
+    app.run_server(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT_5', 8053)))

@@ -201,4 +201,4 @@ if __name__ == "__main__":
     logger.info("Starting standalone app")
     app, server = create_interactive_table_dash_app(anonymize=True)
     logger.info("Running server")
-    app.run_server(debug=True, port=8051)
+    app.run_server(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT_2', 8051)))
