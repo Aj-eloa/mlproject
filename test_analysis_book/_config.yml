@@ -4,11 +4,12 @@ logo: logo.png
 
 execute:
   execute_notebooks: force
+  timeout: 300
 
 repository:
   url: https://github.com/Aj-eloa/mlproject 
-  path_to_book: test_analysis_book  # The sub directory where the book folder is contained. 
-  branch: main  # Use 'main' or 'master' depending on your repository
+  path_to_book: test_analysis_book
+  branch: main
 
 html:
   use_issues_button: true
@@ -25,3 +26,22 @@ sphinx:
     - 'sphinx.ext.autodoc'
     - 'sphinx.ext.napoleon'
     - 'sphinx.ext.viewcode'
+  config:
+    html_theme: sphinx_book_theme
+    html_theme_options:
+      use_download_button: false
+    nb_execution_mode: force
+
+# Add this section to help with file path resolution
+latex:
+  latex_documents:
+    targetname: book.tex
+
+bibtex_bibfiles:
+  - references.bib
+
+# Displaying interactive plotly figures
+sphinx:
+  config:
+    html_js_files:
+    - https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js

@@ -1,4 +1,4 @@
 format: jb-book
 root: intro
 chapters:
-- file: ../notebook/EDA_studentsTestData.ipynb
+- file: EDA_studentsTestData

@@ -1,0 +1,5 @@
+web_performance: gunicorn dash_apps.performance_app:server
+web_standards: gunicorn dash_apps.standards_difficulty_app:server
+web_question_type: gunicorn dash_apps.question_type_difficulty_app:server
+web_comprehensive_trends: gunicorn dash_apps.comprehensive_trends_app:server
+web_interactive_table: gunicorn dash_apps.interactive_table_app:server

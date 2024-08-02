@@ -11,6 +11,7 @@ from src.components.db_connection import build_query
 from pymongo.collection import Collection
 
 
+#TODO: Remove dash app functions, call functions from dash_apps directory in EDA notebook 
 
 def describe_numeric_field_pandas(data, field, query):
     if isinstance(data, Collection):
@@ -476,7 +477,7 @@ def create_performance_graph(performance_by_standard):
 
 
 def create_performance_dash_app(performance_by_standard):
-    app = dash.Dash(__name__, suppress_callback_exceptions=True)
+    app = Dash(__name__, suppress_callback_exceptions=True)
     layout, register_callbacks = create_performance_graph(performance_by_standard)
     app.layout = layout
     register_callbacks(app)
@@ -543,7 +544,7 @@ def create_standards_difficulty_graph(standard_difficulty):
     return create_layout, register_callbacks
 
 def display_standards_difficulty_graph(standard_difficulty):
-    app = dash.Dash(__name__)
+    app = Dash(__name__)
     layout, register_callbacks = create_standards_difficulty_graph(standard_difficulty)
     app.layout = layout()
     register_callbacks(app)
@@ -615,7 +616,7 @@ def create_question_type_difficulty_graph(question_type_difficulty):
     return layout, register_callbacks
 
 def display_question_type_difficulty_graph(question_type_difficulty):
-    app = dash.Dash(__name__)
+    app = Dash(__name__)
     layout, register_callbacks = create_question_type_difficulty_graph(question_type_difficulty)
     app.layout = layout
     register_callbacks(app)
