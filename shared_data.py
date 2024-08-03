@@ -1,88 +1,27 @@
+import os
 import pandas as pd
 from src.components.db_connection import get_database, build_query, logger
 from src.pipelines import mongo_db_pipelines as m_db
 from dotenv import load_dotenv
-import os
-import time
-from faker import Faker
-import random
-import hashlib
-from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_default_query():
-    return build_query(teacher=os.getenv('TEACHER2'))
 
-fake = Faker()
+def get_anonymized_data():
+    """Load pre-anonymized data from CSV file."""
+    logger.info("Loading pre-anonymized data")
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'fake_data.csv')
+    
+    if os.path.exists(csv_path):
+        return pd.read_csv(csv_path)
+    else:
+        logger.error("Pre-anonymized CSV not found. Unable to load anonymized data.")
+        raise FileNotFoundError("fake_data.csv not found")
 
-# Global variables to store the data and timestamp
-_data = None
-_last_load_time = 0
-_cache_duration = 3600  # Cache duration in seconds (e.g., 1 hour)
-
-def fake_test_id():
-    """Generate a fake test ID."""
-    class_names = ['Biology', 'Chemistry', 'Anatomy']
-    test_names = ['Midterm', 'Final', 'Quiz', 'Project', 'Exam']
+def load_real_data():
+    """Load real data from the database."""
+    logger.info("Loading real data from database")
     
-    class_name = random.choice(class_names)
-    test_name = random.choice(test_names)
-    fake_date = fake.date_between(start_date='-1y', end_date='today').strftime('%Y%m%d')
-    
-    return f"{class_name}_{test_name}_{fake_date}"
-
-def create_mapping(original_values, fake_function):
-    """Create a mapping for anonymization."""
-    return {value: fake_function() for value in set(original_values)}
-
-def anonymize_df(df):
-    """Anonymize the dataframe by replacing identifiable information in-place."""
-    logger.info("Starting dataframe anonymization")
-    
-    # Create mappings for names and IDs
-    student_id_map = {id: hashlib.md5(str(id).encode()).hexdigest()[:8] for id in df['student_id'].unique()}
-    first_name_map = {name: fake.first_name() for name in df['first_name'].unique()}
-    last_name_map = {name: fake.last_name() for name in df['last_name'].unique()}
-    class_name_map = {class_name: f"Fake-class{fake.numerify('####')}" for class_name in df['class_name'].unique()}
-    
-    # Create a mapping for test_ids to ensure consistency
-    test_id_map = {}
-    for test_id in df['test_id'].unique():
-        parts = test_id.split('_')
-        if len(parts) >= 3:
-            new_test_id = f"{class_name_map.get(parts[0], parts[0])}_{fake.word().capitalize()}_{fake.date_this_year().strftime('%Y%m%d')}"
-        else:
-            new_test_id = f"Test_{fake.word().capitalize()}_{fake.date_this_year().strftime('%Y%m%d')}"
-        test_id_map[test_id] = new_test_id
-    
-    # Apply mappings in-place
-    df['student_id'] = df['student_id'].map(student_id_map)
-    df['first_name'] = df['first_name'].map(first_name_map)
-    df['last_name'] = df['last_name'].map(last_name_map)
-    df['class_name'] = df['class_name'].map(class_name_map)
-    df['test_id'] = df['test_id'].map(test_id_map)
-    
-    # Update test_name based on the new test_id
-    df['test_name'] = df['test_id'].apply(lambda x: ' '.join(x.split('_')[1:-1]))
-    
-    logger.info("Dataframe anonymization completed")
-   
-    return df
-
-def load_data(force_reload=False, anonymize=False):
-    global _data, _last_load_time
-    
-    current_time = time.time()
-    
-    # If data is cached and not expired, return the cached data
-    if not force_reload and _data is not None and (current_time - _last_load_time) < _cache_duration:
-        logger.info("Returning cached data")
-        return _data
-
-    logger.info("Loading fresh data from database")
-    
-    load_dotenv()
     db = get_database(create_indices=True)
     students = db['students']
     teacher = os.getenv('TEACHER2')
@@ -91,17 +30,15 @@ def load_data(force_reload=False, anonymize=False):
     pipeline = m_db.comprehensive_test_analysis_pipeline(query)
     results = list(students.aggregate(pipeline))
     
-    df = pd.DataFrame(results)
-    
-    if anonymize:
-        logger.info("Anonymizing data")
-        df = anonymize_df(df)
-    
-    # Store the loaded data and update the timestamp
-    _data = df
-    _last_load_time = current_time
-    
-    return _data
+    return pd.DataFrame(results)
 
 def get_data(anonymize=False):
-    return load_data(anonymize=anonymize)
+    """
+    Get data based on the anonymize flag.
+    If anonymize is True, return pre-anonymized data from CSV.
+    If anonymize is False, return real data from the database.
+    """
+    if anonymize:
+        return get_anonymized_data()
+    else:
+        return load_real_data()
