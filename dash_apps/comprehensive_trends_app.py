@@ -14,7 +14,7 @@ from src.pipelines import mongo_db_pipelines as m_db
 
 
 
-from shared_data import get_data, logger, get_default_query
+from shared_data import get_data, logger
 from src.utils import performance_trend
 
 def process_performance_trend(df, query):
@@ -265,7 +265,7 @@ def create_comprehensive_dash_app(df, custom_query=None):
     students = db['students']
     
     # Use custom query if provided, otherwise use default
-    query = custom_query if custom_query is not None else get_default_query()
+    query = custom_query if custom_query else None
     logger.info(f"Using query: {query}")
     
     performance_trend_df = process_performance_trend(students, query)  
@@ -289,3 +289,5 @@ if __name__ == '__main__':
     app, server = create_comprehensive_dash_app(df)  # Or pass custom_query here if needed
     logger.info("Running server")
     app.run_server(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8055)))
+
+
