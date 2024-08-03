@@ -10,7 +10,8 @@ load_dotenv()
 def get_anonymized_data():
     """Load pre-anonymized data from CSV file."""
     logger.info("Loading pre-anonymized data")
-    csv_path = os.path.join(os.path.dirname(__file__), '..', 'fake_data.csv')
+    csv_path = os.path.join(os.path.dirname(__file__), 'fake_data.csv')
+    print(csv_path)
     
     if os.path.exists(csv_path):
         return pd.read_csv(csv_path)
@@ -44,4 +45,3 @@ def get_data(anonymize=False):
         return load_real_data()
 
 
-get_anonymized_data()
