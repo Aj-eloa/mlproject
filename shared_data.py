@@ -42,3 +42,6 @@ def get_data(anonymize=False):
         return get_anonymized_data()
     else:
         return load_real_data()
+
+
+get_anonymized_data()
