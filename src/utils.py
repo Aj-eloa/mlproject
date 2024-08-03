@@ -1,8 +1,6 @@
 from dash import Dash, html, dcc, dash_table, Input, Output, callback, State
-import dash_bootstrap_components as dbc
 from bson.son import SON
 import pandas as pd
-import dash
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
