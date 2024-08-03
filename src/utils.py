@@ -1,5 +1,4 @@
 from dash import Dash, html, dcc, dash_table, Input, Output, callback, State
-from IPython.display import display
 import dash_bootstrap_components as dbc
 from bson.son import SON
 import pandas as pd
